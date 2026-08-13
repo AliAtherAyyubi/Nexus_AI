@@ -1,31 +1,80 @@
-import "server-only"; 
+import "server-only";
 import { GoogleGenAI } from "@google/genai";
-import { NextResponse } from "next/server";
-
-// Initialize the client. It automatically picks up process.env.GEMINI_API_KEY
-const ai = new GoogleGenAI({});
+import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 
 export async function POST(request: Request) {
   try {
-    const { prompt } = await request.json();
+    const { prompt, conversationId, pdfUri, model } = await request.json();
 
     if (!prompt) {
-      return new Response(JSON.stringify({ error: "Prompt is required" }), { status: 400 });
+      return new Response(JSON.stringify({ error: "Prompt is required" }), {
+        status: 400,
+      });
     }
 
+    // ✅ Check if conversation has an uploaded PDF
+    let contents: object[] = [{ text: prompt }];
+
+    if (pdfUri) {
+  contents = [
+    {
+      text: `You are a helpful assistant. Answer the user's question based on the provided document. If the answer is not in the document, say so clearly.\n\nUser question: ${prompt}`,
+    },
+    {
+      fileData: {
+        fileUri: pdfUri,
+        mimeType: "application/pdf",
+      },
+    },
+  ];
+} else if (conversationId) {
+  // Fallback: check DB for previously uploaded doc in this conversation
+  try {
+    const cookieStore = await cookies();
+
+    const supabase = createClient(cookieStore);
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (user) {
+      const { data: docs } = await supabase
+        .from("documents")
+        .select("gemini_uri, mime_type")
+        .eq("conversation_id", conversationId)
+        .eq("user_id", user.id)
+        .order("created_at", { ascending: false })
+        .limit(1);
+
+      if (docs && docs.length > 0 && docs[0].gemini_uri) {
+        contents = [
+          {
+            text: `You are a helpful assistant. Answer the user's question based on the provided document.\n\nUser question: ${prompt}`,
+          },
+          {
+            fileData: {
+              fileUri: docs[0].gemini_uri,
+              mimeType: docs[0].mime_type ?? "application/pdf",
+            },
+          },
+        ];
+      }
+    }
+  } catch (err) {
+    console.error("Doc fetch error (non-fatal):", err);
+  }
+}
+
     const stream = await ai.models.generateContentStream({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+      model: model ?? "gemini-3.5-flash-lite",
+      contents: [{ role: "user", parts: contents }],
     });
 
-    // ✅ Return a ReadableStream so the frontend can consume chunks
     const readable = new ReadableStream({
       async start(controller) {
         for await (const chunk of stream) {
           const text = chunk.text ?? "";
-          if (text) {
-            controller.enqueue(new TextEncoder().encode(text));
-          }
+          if (text) controller.enqueue(new TextEncoder().encode(text));
         }
         controller.close();
       },
@@ -35,36 +84,12 @@ export async function POST(request: Request) {
       headers: {
         "Content-Type": "text/plain; charset=utf-8",
         "Transfer-Encoding": "chunked",
-        "X-Content-Type-Options": "nosniff",
       },
     });
   } catch (error) {
     console.error("Gemini API Error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
-    return new Response(JSON.stringify({ error: errorMessage }), { status: 500 });
-  }
-}
-export async function GET() {
-  try {
-    const prompt  = 'give me 10 country names';
-
-    if (!prompt) {
-      return NextResponse.json({ error: "Prompt is required" }, { status: 400 });
-    }
-
-    // Call the Gemini model (gemini-3.5-flash is ideal for general text/multimodal tasks)
-    const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash",
-      contents: prompt,
+    return new Response(JSON.stringify({ error: String(error) }), {
+      status: 500,
     });
-    // console.log(response)
-    return NextResponse.json({ text: response.text });
-  } catch (error) {
-    console.error("Gemini API Error:", error);
-    const errorMessage = error instanceof Error ? error.message : "Internal Server Error";
-    return NextResponse.json(
-      { error: errorMessage },
-      { status: 500 }
-    );
   }
 }

@@ -1,26 +1,22 @@
 "use client";
 import { useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Code2, Globe, BookOpen, Palette } from "lucide-react";
 import MessageBubble from "./MessageBubble";
-import ChatInput from "./ChatInput";
+import ChatInput from "../layout/ChatInput";
 import type { Message } from "@/types";
-
 interface ChatAreaProps {
   messages: Message[];
   isLoading: boolean;
-  onSend: (msg: string) => void;
+  onSend: (msg: string, pdfUri?: string) => void;
+  onPdfUploaded: (uri: string, name: string) => void;
   activeConversationId: string | null;
+  activePdfUri: string | null;
+  onEdit: (messageId: string, newContent: string) => void;     
+  onRegenerate: (messageId: string) => void;
 }
 
-const CAPABILITIES = [
-  { icon: Code2, label: "Code & debug", desc: "Write, review & fix code in any language" },
-  { icon: Globe, label: "Research", desc: "Summarize, analyze, and fact-check" },
-  { icon: BookOpen, label: "Writing", desc: "Draft emails, essays, stories & more" },
-  { icon: Palette, label: "Creative", desc: "Brainstorm ideas and build concepts" },
-];
 
-export default function ChatArea({ messages, isLoading, onSend, activeConversationId }: ChatAreaProps) {
+export default function ChatArea({ messages, isLoading, onSend, activeConversationId,onPdfUploaded,activePdfUri, onEdit, onRegenerate }: ChatAreaProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const isEmpty = messages.length === 0;
 
@@ -78,47 +74,7 @@ export default function ChatArea({ messages, isLoading, onSend, activeConversati
               >
                 How can I help you today?
               </motion.h1>
-              {/* <motion.p
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.22 }}
-                className="text-sm text-center mb-10 max-w-sm"
-                style={{ color: "var(--color-text-muted)" }}
-              >
-                I&apos;m Nexus — your intelligent AI assistant. Ask me anything.
-              </motion.p> */}
-
-              {/* Capability cards */}
-              {/* <div className="grid grid-cols-2 gap-3 w-full max-w-md">
-                {CAPABILITIES.map(({ icon: Icon, label, desc }, i) => (
-                  <motion.div
-                    key={label}
-                    initial={{ opacity: 0, y: 16, scale: 0.95 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: 0.3 + i * 0.07, type: "spring" }}
-                    whileHover={{ scale: 1.03, y: -2 }}
-                    className="p-4 rounded-2xl transition-all cursor-pointer group"
-                    style={{
-                      background: "var(--color-card-bg)",
-                      border: "1px solid var(--color-card-border)",
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = "rgba(124,58,237,0.3)";
-                      e.currentTarget.style.background = "rgba(124,58,237,0.05)";
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = "var(--color-card-border)";
-                      e.currentTarget.style.background = "var(--color-card-bg)";
-                    }}
-                  >
-                    <div className="w-8 h-8 rounded-xl bg-violet-500/15 flex items-center justify-center mb-2.5 group-hover:bg-violet-500/25 transition-all">
-                      <Icon size={15} className="text-violet-400" />
-                    </div>
-                    <p className="text-xs font-semibold mb-0.5" style={{ color: "var(--color-text)" }}>{label}</p>
-                    <p className="text-[11px] leading-relaxed" style={{ color: "var(--color-text-muted)" }}>{desc}</p>
-                  </motion.div>
-                ))}
-              </div> */}
+              
             </motion.div>
           ) : (
             <motion.div
@@ -128,7 +84,13 @@ export default function ChatArea({ messages, isLoading, onSend, activeConversati
               className="px-4 py-6 space-y-5 max-w-3xl mx-auto w-full"
             >
               {messages.map((msg, i) => (
-                <MessageBubble key={msg.id} message={msg} index={i} />
+                 <MessageBubble
+    key={msg.id}
+    message={msg}
+    index={i}
+    onEdit={onEdit}
+    onRegenerate={onRegenerate}
+  />
               ))}
               <div ref={bottomRef} />
             </motion.div>
@@ -138,7 +100,13 @@ export default function ChatArea({ messages, isLoading, onSend, activeConversati
 
       {/* Input */}
       <div className="max-w-3xl mx-auto w-full">
-        <ChatInput onSend={onSend} isLoading={isLoading} />
+        <ChatInput
+  onSend={onSend}
+  isLoading={isLoading}
+  conversationId={activeConversationId}
+  activePdfUri={activePdfUri}
+   onPdfUploaded={onPdfUploaded}
+/>
       </div>
     </div>
   );

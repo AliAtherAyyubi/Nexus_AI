@@ -16,9 +16,15 @@ export default function ChatLayout() {
   isLoading,
   selectConversation,
   newConversation,
+  activePdfUri, 
   sendMessage,
-  deleteConversation, // ✅ added
+  deleteConversation, 
+  editMessage,
+  regenerateMessage,
 } = useChat();
+const handlePdfUploaded = (uri: string, name: string) => {
+  sendMessage("", uri); // stores URI in activePdfUri without sending a visible message
+};
   const { theme, toggleTheme, mounted } = useTheme();
   return (
     <div
@@ -30,7 +36,7 @@ export default function ChatLayout() {
   conversations={conversations}
   activeId={activeConversationId}
   onSelect={selectConversation}
-  onDelete={deleteConversation} // ✅ added
+  onDelete={deleteConversation} 
   onNew={newConversation}
   collapsed={sidebarCollapsed}
   onToggle={() => setSidebarCollapsed(!sidebarCollapsed)}
@@ -44,37 +50,13 @@ export default function ChatLayout() {
 
       {/* Main */}
       <div className="flex-1 flex flex-col overflow-hidden relative">
-        {/* Collapse toggle */}
-        <motion.button
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="absolute top-4 left-4 z-10 p-1.5 rounded-lg transition-all"
-          style={{
-            color: "var(--color-icon)",
-            background: "transparent",
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.color = "var(--color-icon-hover)";
-            e.currentTarget.style.background = "var(--color-hover-bg)";
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.color = "var(--color-icon)";
-            e.currentTarget.style.background = "transparent";
-          }}
-        >
-          {sidebarCollapsed ? (
-            <PanelLeftOpen size={15} />
-          ) : (
-            <PanelLeftClose size={15} />
-          )}
-        </motion.button>
+       
         {/* toggle button */}
         <motion.button
           whileHover={{ scale: 1.05 }}
           whileTap={{ scale: 0.95 }}
           onClick={toggleTheme}
-          className="absolute top-4 right-4 z-10 p-1.5 rounded-lg transition-all"
+          className="absolute top-4 right-4 z-10 p-1.5 rounded-lg transition-all cursor-pointer"
           style={{
             color: "var(--color-text)",
             background: "var(--color-overlay)",
@@ -113,7 +95,11 @@ export default function ChatLayout() {
           messages={messages}
           isLoading={isLoading}
           onSend={sendMessage}
+          onPdfUploaded={handlePdfUploaded}
+          activePdfUri={activePdfUri}
           activeConversationId={activeConversationId}
+          onEdit={editMessage}
+          onRegenerate={regenerateMessage}
         />
       </div>
     </div>

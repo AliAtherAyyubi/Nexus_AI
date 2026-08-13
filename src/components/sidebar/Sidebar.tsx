@@ -9,6 +9,8 @@ import {
   MessageCircleDashedIcon,
   MessageCircle,
   Trash2,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { cn, formatDate } from "@/utils";
 import type { Conversation, UserProfile } from "@/types";
@@ -62,15 +64,15 @@ export default function Sidebar({
   onToggle,
 }: SidebarProps) {
   const [search, setSearch] = useState("");
-  const [showProfile, setShowProfile] = useState(false);
+  // const [showProfile, setShowProfile] = useState(false);
 
   const filtered = conversations.filter((c) =>
-    c.title.toLowerCase().includes(search.toLowerCase()),
+    (c.title ?? "").toLowerCase().includes(search.toLowerCase()),
   );
 
   const pinned = filtered.filter((c) => c.pinned);
   const recent = filtered.filter((c) => !c.pinned);
-  const badge = PLAN_BADGE[USER.plan];
+  // const badge = PLAN_BADGE[USER.plan];
 
   return (
     <motion.aside
@@ -86,15 +88,45 @@ export default function Sidebar({
       <div
         className={cn(
           "flex items-center gap-3 px-4 py-5",
-          collapsed && "justify-center px-0",
+          collapsed ? "flex-col gap-2 px-0" : "flex-row gap-3",
         )}
       >
+        {/* Collapse toggle */}
+        {
+          collapsed! && (
+            <motion.button
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onToggle}
+          className="shrink-0 p-1.5 rounded-lg transition-all cursor-pointer"
+          style={{
+            color: "var(--color-icon)",
+            background: "transparent",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.color = "var(--color-icon-hover)";
+            e.currentTarget.style.background = "var(--color-hover-bg)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.color = "var(--color-icon)";
+            e.currentTarget.style.background = "transparent";
+          }}
+          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        >
+          {collapsed ? (
+            <PanelLeftOpen size={15} />
+          ) : (
+            <PanelLeftClose size={15} />
+          )}
+        </motion.button>
+          )
+        }
         {/* Logo mark */}
         <motion.div
           whileHover={{ scale: 1.05, rotate: 5 }}
           className="relative flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center cursor-pointer"
           style={{ background: "linear-gradient(135deg, #7C3AED, #22D3EE)" }}
-          onClick={onToggle}
+          onClick={onNew}
         >
           <span className="text-white font-black text-sm">N</span>
           <div
@@ -126,6 +158,30 @@ export default function Sidebar({
             </motion.div>
           )}
         </AnimatePresence>
+        {/* Collapse toggle */}
+        {!collapsed && (
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={onToggle}
+            className="shrink-0 p-1.5 rounded-lg transition-all cursor-pointer"
+            style={{
+              color: "var(--color-icon)",
+              background: "transparent",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = "var(--color-icon-hover)";
+              e.currentTarget.style.background = "var(--color-hover-bg)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = "var(--color-icon)";
+              e.currentTarget.style.background = "transparent";
+            }}
+            aria-label="Collapse sidebar"
+          >
+            <PanelLeftClose size={15} />
+          </motion.button>
+        )}
       </div>
 
       {/* ── New Chat Button ── */}
@@ -135,7 +191,7 @@ export default function Sidebar({
           whileTap={{ scale: 0.97 }}
           onClick={onNew}
           className={cn(
-            "w-full flex items-center gap-2.5 rounded-xl text-sm font-semibold transition-all",
+            "w-full flex items-center gap-2.5 rounded-xl text-sm font-semibold transition-all cursor-pointer",
             "bg-violet-600 hover:bg-violet-500 text-white",
             collapsed ? "justify-center p-3" : "px-3.5 py-2.5",
           )}
@@ -340,7 +396,9 @@ function ConversationItem({
           className="p-1 rounded-md transition-all shrink-0 cursor-pointer"
           style={{ color: "var(--color-text-muted)" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
-          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-muted)")}
+          onMouseLeave={(e) =>
+            (e.currentTarget.style.color = "var(--color-text-muted)")
+          }
           title="Delete conversation"
         >
           <Trash2 size={15} />

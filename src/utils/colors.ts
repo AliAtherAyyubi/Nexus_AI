@@ -24,7 +24,7 @@ export const palette = {
   // Text
   textPrimary:   "#F1F0FF",
   textSecondary: "#9B9BC0",
-  textMuted:     "#5C5C7A",
+  textMuted:     "#bdbdeb",
   textInverse:   "#0A0A0F",
 
   // Semantic

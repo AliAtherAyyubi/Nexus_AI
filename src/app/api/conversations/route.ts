@@ -33,28 +33,38 @@ export async function GET(req: Request) {
 }
 
 // POST — create a new conversation for the logged-in user
+// ✅ REPLACE entire POST function with this
 export async function POST(req: Request) {
   try {
-    const cookieStore = await cookies();
+
+     const cookieStore = await cookies()
+
     const supabase = createClient(cookieStore);
 
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
-
+    const { data: { user } } = await supabase.auth.getUser();
     if (!user) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { title } = await req.json();
+    const body = await req.json();
+    console.log("POST /api/conversations body:", body);
+
+    // ✅ Always guarantee a non-null title
+    const title =
+      typeof body?.title === "string" && body.title.trim().length > 0
+        ? body.title.trim()
+        : "New conversation";
 
     const { data, error } = await supabase
       .from("conversations")
       .insert({ title, user_id: user.id })
-      .select("*, messages(*)")
+      .select("*")
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("Supabase insert error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
 
     return NextResponse.json(data);
   } catch (error) {

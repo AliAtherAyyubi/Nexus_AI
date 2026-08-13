@@ -20,7 +20,10 @@ export default function LoginPage() {
     setError(null);
     setLoading(true);
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
     if (error) {
       setError(error.message);
@@ -56,13 +59,21 @@ export default function LoginPage() {
             <span className="text-white font-black text-lg">N</span>
             <div
               className="absolute inset-0 rounded-2xl blur-md opacity-60 -z-10"
-              style={{ background: "linear-gradient(135deg, #7C3AED, #22D3EE)" }}
+              style={{
+                background: "linear-gradient(135deg, #7C3AED, #22D3EE)",
+              }}
             />
           </motion.div>
-          <h1 className="font-bold text-xl" style={{ color: "var(--color-text)" }}>
+          <h1
+            className="font-bold text-xl"
+            style={{ color: "var(--color-text)" }}
+          >
             Welcome back
           </h1>
-          <p className="text-sm mt-1" style={{ color: "var(--color-text-muted)" }}>
+          <p
+            className="text-sm mt-1"
+            style={{ color: "var(--color-text-muted)" }}
+          >
             Sign in to continue to Nexus AI
           </p>
         </div>
@@ -110,13 +121,16 @@ export default function LoginPage() {
 
           {/* Password */}
           <div className="space-y-1.5">
-            <label
-              htmlFor="password"
-              className="text-xs font-medium"
-              style={{ color: "var(--color-text-sub)" }}
-            >
-              Password
-            </label>
+            <div className="flex items-center justify-between">
+              <label
+                htmlFor="password"
+                className="text-xs font-medium"
+                style={{ color: "var(--color-text-sub)" }}
+              >
+                Password
+              </label>
+              
+            </div>
             <div className="relative">
               <Lock
                 size={15}
@@ -137,7 +151,14 @@ export default function LoginPage() {
                   color: "var(--color-text)",
                 }}
               />
+              
             </div>
+            <Link
+                href="/forgot-password"
+                className="text-[11px] font-medium text-violet-700 hover:text-violet-400 transition-colors"
+              >
+                Forgot password?
+              </Link>
           </div>
 
           {error && (
@@ -175,7 +196,10 @@ export default function LoginPage() {
           style={{ color: "var(--color-text-muted)" }}
         >
           Don&apos;t have an account?{" "}
-          <Link href="/signup" className="font-medium text-violet-400 hover:text-violet-300">
+          <Link
+            href="/signup"
+            className="font-medium text-violet-400 hover:text-violet-300"
+          >
             Sign up
           </Link>
         </p>
