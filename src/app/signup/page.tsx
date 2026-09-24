@@ -3,7 +3,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { Mail, Lock, User, Loader2, ArrowRight, CheckCircle2 } from "lucide-react";
-import { createClient } from "@/utils/supabase/client";
+import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 
 export default function SignupPage() {
@@ -175,7 +175,7 @@ export default function SignupPage() {
               initial={{ opacity: 0, y: -4 }}
               animate={{ opacity: 1, y: 0 }}
               className="text-xs rounded-lg px-3 py-2"
-              style={{ color: "#FCA5A5", background: "rgba(239,68,68,0.1)" }}
+              style={{ color: "#FCA5A5", background: "rgba(239,68,68,0.3)" }}
             >
               {error}
             </motion.p>
@@ -184,7 +184,7 @@ export default function SignupPage() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full !h-10 text-white font-semibold"
+            className="w-full !h-10 text-white font-semibold cursor-pointer"
             style={{ background: "linear-gradient(135deg, #7C3AED, #8B5CF6)", boxShadow: "0 0 20px rgba(124,58,237,0.35)" }}
           >
             {loading ? <Loader2 size={16} className="animate-spin" /> : <>Create account <ArrowRight size={14} /></>}

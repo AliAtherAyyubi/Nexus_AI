@@ -13,8 +13,9 @@ import {
   PanelLeftOpen,
 } from "lucide-react";
 import { cn, formatDate } from "@/utils";
-import type { Conversation, UserProfile } from "@/types";
+import type { Conversation, } from "@/types";
 import { ProfileSettings } from "../profile";
+import { DeleteChatAlert } from "./deleteChat";
 
 interface SidebarProps {
   conversations: Conversation[];
@@ -26,33 +27,6 @@ interface SidebarProps {
   onToggle: () => void;
 }
 
-const USER: UserProfile = {
-  id: "1",
-  name: "Alex Rivera",
-  email: "alex@studio.dev",
-  plan: "pro",
-};
-
-const PLAN_BADGE = {
-  free: {
-    label: "Free",
-    icon: null,
-    style: {
-      color: "var(--color-text-sub)",
-      background: "var(--color-overlay)",
-    },
-  },
-  pro: {
-    label: "Pro",
-    icon: Zap,
-    style: { color: "#A78BFA", background: "rgba(124,58,237,0.15)" },
-  },
-  enterprise: {
-    label: "Enterprise",
-    icon: Crown,
-    style: { color: "#FCD34D", background: "rgba(245,158,11,0.15)" },
-  },
-};
 
 export default function Sidebar({
   conversations,
@@ -287,7 +261,7 @@ export default function Sidebar({
             conv={c}
             active={c.id === activeId}
             onSelect={onSelect}
-            onDelete={onDelete} // ✅ added
+            onDelete={onDelete} 
             collapsed={collapsed}
             index={i}
           />
@@ -311,7 +285,7 @@ function ConversationItem({
   onSelect,
   onDelete,
   collapsed,
-  index,
+  
 }: {
   conv: Conversation;
   active: boolean;
@@ -388,22 +362,24 @@ function ConversationItem({
       )}
 
       {!collapsed && (
+  <div onClick={(e) => e.stopPropagation()}>
+    <DeleteChatAlert
+      onConfirm={() => onDelete(conv.id)}
+      trigger={
         <div
-          onClick={(e) => {
-            e.stopPropagation();
-            onDelete(conv.id);
-          }}
           className="p-1 rounded-md transition-all shrink-0 cursor-pointer"
           style={{ color: "var(--color-text-muted)" }}
           onMouseEnter={(e) => (e.currentTarget.style.color = "#EF4444")}
-          onMouseLeave={(e) =>
-            (e.currentTarget.style.color = "var(--color-text-muted)")
-          }
+          onMouseLeave={(e) => (e.currentTarget.style.color = "var(--color-text-muted)")}
           title="Delete conversation"
         >
           <Trash2 size={15} />
         </div>
-      )}
+      }
+    />
+  </div>
+)}
+
     </div>
   );
 }

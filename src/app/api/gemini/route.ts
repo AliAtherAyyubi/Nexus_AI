@@ -1,6 +1,6 @@
 import "server-only";
 import { GoogleGenAI } from "@google/genai";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 

@@ -125,9 +125,7 @@ export function useChat() {
   // ── Send message ──
   const sendMessage = useCallback(
     async (content: string, pdfUri?: string, model?: string) => {
-      const hasContent = content.trim().length > 0;
-      const hasPdf = !!pdfUri || !!activePdfUri;
-      if ((!hasContent && !hasPdf) || isLoading) return;
+      if (!content.trim() || isLoading) return;
 
       // Store new PDF URI if provided
       if (pdfUri) setActivePdfUri(pdfUri);
@@ -231,7 +229,7 @@ export function useChat() {
             prompt: content,
             conversationId: convId,
             pdfUri: effectivePdfUri ?? null,
-            model: model ?? "gemini-2.0-flash",
+            model: model ?? "gemini-3.5-flash-lite",
           }),
         });
 
@@ -286,7 +284,7 @@ export function useChat() {
         setMessages((prev) =>
           prev.map((m) =>
             m.id === assistantId
-              ? { ...m, content: "Failed to connect to Gemini.", isStreaming: false }
+              ? { ...m, content: "Failed to connect to Nexus.", isStreaming: false }
               : m
           )
         );

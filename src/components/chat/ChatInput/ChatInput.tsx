@@ -63,7 +63,7 @@ export default function ChatInput({
     }
 
     // Show placeholder card immediately
-    setFiles((prev) => [
+    setFiles((prev) => [ 
       ...prev,
       { id, name: file.name, size: file.size, type: file.type, preview, uploading: true },
     ]);
@@ -107,9 +107,7 @@ export default function ChatInput({
 
   // ── Send ──────────────────────────────────────────────────────────────────
  const handleSend = () => {
-  const hasText = value.trim().length > 0;
-  const hasFile = files.some((f) => f.uri) || !!activePdfUri;
-  if ((!hasText && !hasFile) || isLoading) return;
+  if (!value.trim() || isLoading) return;
 
   const pdfUri = files.find((f) => f.uri)?.uri ?? activePdfUri ?? undefined;
   onSend(value.trim(), pdfUri, selectedModel.id);

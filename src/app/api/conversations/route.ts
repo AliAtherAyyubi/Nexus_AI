@@ -1,6 +1,6 @@
 import "server-only";
 import { NextResponse } from "next/server";
-import { createClient } from "@/utils/supabase/server";
+import { createClient } from "@/lib/supabase/server";
 import { cookies } from "next/headers";
 
 // GET — fetch all conversations for the logged-in user

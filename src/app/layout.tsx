@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import { Poppins, Geist } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
+import ClientWrapper from "@/components/clientWrapper"; 
 
-const geist = Geist({subsets:['latin'],variable:'--font-sans'});
+const geist = Geist({ subsets: ["latin"], variable: "--font-sans" });
 
 const poppins = Poppins({
   subsets: ["latin"],
@@ -12,6 +13,7 @@ const poppins = Poppins({
   display: "swap",
 });
 
+// ✅ Inject theme before paint to avoid flash
 const themeInitScript = `
 (function() {
   try {
@@ -33,10 +35,17 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={cn("h-full", poppins.variable, "font-sans", geist.variable)} suppressHydrationWarning>
+    <html
+      lang="en"
+      className={cn("h-full", poppins.variable, "font-sans", geist.variable)}
+      suppressHydrationWarning
+    >
       <body className={`h-full antialiased ${poppins.className}`}>
+        {/* Theme init runs before hydration to prevent flash */}
         <script dangerouslySetInnerHTML={{ __html: themeInitScript }} />
-        {children}
+
+        {/* ✅ ClientWrapper handles splash screen + auth redirect */}
+        <ClientWrapper>{children}</ClientWrapper>
       </body>
     </html>
   );
